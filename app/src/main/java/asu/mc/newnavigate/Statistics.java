@@ -1,11 +1,15 @@
 package asu.mc.newnavigate;
 
 
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,27 +22,97 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 public class Statistics extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
     private String Date, Time;
     BarChart crimeVsCount;
     HashMap<String, Integer> CrimeVsCount = new HashMap<>();
+    // Sort method needs a List, so let's first convert Set to List in Java
+    List<Entry<String, Integer>> listOfEntries;
+    LinkedHashMap<String, Integer> sortedByValue = new LinkedHashMap<String, Integer>(10);
+    //System.out.print("HashMap before sorting, random order ");
+    private void captureScreen(View v) {
+        File path = getFilesDir();
+        //View v = getWindow().getDecorView().getRootView();
+        v.setDrawingCacheEnabled(true);
+        Bitmap bmp = Bitmap.createBitmap(v.getDrawingCache());
+        v.setDrawingCacheEnabled(false);
+        try {
+            //FileOutputStream fos = new FileOutputStream(new File(path.getCanonicalFile() + "SCREEN"
+            //        + System.currentTimeMillis() + ".png"));
+            File f = new File(Environment.getExternalStorageDirectory().getPath() + "/Bar_Chart.png");
+            FileOutputStream fos = new FileOutputStream(f);
+            Log.d("FIlePATH $$$$$$$", path.getCanonicalPath());
+            bmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.statistics);
+        Button button = (Button) findViewById(R.id.button2);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Do something in response to button click
+                Bitmap bitmap = takeScreenshot(getWindow().getDecorView());
+                saveBitmap(bitmap);
+
+                //captureScreen(findViewById(R.id.bargraph));
+
+            }
+
+
+            public Bitmap takeScreenshot(View v) {
+                //View rootView = findViewById(android.R.id.content).getRootView();
+                v.setDrawingCacheEnabled(true);
+                return v.getDrawingCache();
+            }
+
+            public void saveBitmap(Bitmap bitmap) {
+                File imagePath = new File(Environment.getExternalStorageDirectory() + "/BarChart.jpeg");
+                FileOutputStream fos;
+                try {
+                    fos = new FileOutputStream(imagePath);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                    fos.flush();
+                    fos.close();
+                    Toast.makeText(getApplicationContext(),"Image downloaded",Toast.LENGTH_LONG).show();
+                } catch (FileNotFoundException e) {
+                    Log.e("GREC", e.getMessage(), e);
+                } catch (IOException e) {
+                    Log.e("GREC", e.getMessage(), e);
+                }
+            }
+
+        });
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 readCrimeData();
@@ -57,10 +131,16 @@ public class Statistics extends AppCompatActivity implements AdapterView.OnItemS
 
 
                 ArrayList<String> crimes1 = new ArrayList<>();
-                for(String crime : CrimeVsCount.keySet() ) {
-                    crimes1.add(crime);
-                    barEntries.add(new BarEntry(count++, CrimeVsCount.get(crime)));
+                Set<Entry<String, Integer>> entrySetSortedByValue = sortedByValue.entrySet();
+
+                for(Entry<String, Integer> mapping : entrySetSortedByValue){
+                    System.out.println(mapping.getKey() + " ==> " + mapping.getValue());
+                    crimes1.add(mapping.getKey());
+                    barEntries.add(new BarEntry(count++, mapping.getValue()));
+
+
                 }
+
                 crimeVsCount.getXAxis().setValueFormatter(new IndexAxisValueFormatter(crimes1));
                 BarDataSet barDataSet = new BarDataSet(barEntries, "Crimes");
                 barDataSet.setColors(ColorTemplate.JOYFUL_COLORS);
@@ -69,7 +149,7 @@ public class Statistics extends AppCompatActivity implements AdapterView.OnItemS
                 //dataSets.add(barDataSet);
 
                 BarData data = new BarData(barDataSet);
-                data.setBarWidth(1f);
+                data.setBarWidth(0.5f);
 
                 crimeVsCount.setData(data);
                 crimeVsCount.setDragEnabled(true);
@@ -150,6 +230,53 @@ public class Statistics extends AppCompatActivity implements AdapterView.OnItemS
 
                 Log.d("Crime Vs Count", crime + " : " + CrimeVsCount.get(crime));
             }
+
+            Set<Map.Entry<String, Integer>> entries = CrimeVsCount.entrySet();
+            Comparator<Entry<String, Integer>> valueComparator = new Comparator<Entry<String,Integer>>() {
+
+                @Override
+                public int compare(Entry<String, Integer> e1, Entry<String, Integer> e2) {
+                    Integer v1 = e1.getValue();
+                    Integer v2 = e2.getValue();
+                    return(v2-v1);
+                }
+            };
+
+            listOfEntries = new ArrayList<Entry<String, Integer>>(entries);
+
+
+
+            // sorting HashMap by values using comparator
+            Collections.sort(listOfEntries, valueComparator);
+
+
+
+            int count1 = 10;
+            // copying entries from List to Map
+            for(Entry<String, Integer> entry : listOfEntries){
+                sortedByValue.put(entry.getKey(), entry.getValue());
+                count1-=1;
+                if(count1==0)
+                {
+                    break;
+                }
+
+            }
+
+            System.out.println("HashMap after sorting entries by values ");
+            Set<Entry<String, Integer>> entrySetSortedByValue = sortedByValue.entrySet();
+
+            for(Entry<String, Integer> mapping : entrySetSortedByValue){
+                System.out.println(mapping.getKey() + " ==> " + mapping.getValue());
+
+
+            }
+
+
+
+
+
+
 
         }
         catch(IOException e)

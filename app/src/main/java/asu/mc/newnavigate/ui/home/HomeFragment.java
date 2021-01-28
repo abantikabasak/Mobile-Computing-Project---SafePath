@@ -2,8 +2,6 @@ package asu.mc.newnavigate.ui.home;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,16 +10,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -38,9 +32,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.io.IOException;
-import java.util.List;
 
 import asu.mc.newnavigate.MainActivity;
 import asu.mc.newnavigate.R;
@@ -381,26 +372,30 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback,
     public boolean checkLocationPermission(){
         if (ContextCompat.checkSelfPermission(getActivity(),
                 Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
 
             // Asking user if explanation is needed
             if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                     Manifest.permission.ACCESS_FINE_LOCATION)) {
 
-                // Show an explanation to the user *asynchronously* -- don't block
+                // Show an explanation to the user asynchronously -- don't block
                 // this thread waiting for the user's response! After the user
                 // sees the explanation, try again to request the permission.
 
                 //Prompt the user once explanation has been shown
                 ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
                         MY_PERMISSIONS_REQUEST_LOCATION);
 
 
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
                         MY_PERMISSIONS_REQUEST_LOCATION);
             }
             return false;

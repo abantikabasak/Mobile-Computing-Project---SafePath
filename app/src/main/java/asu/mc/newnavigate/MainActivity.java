@@ -1,55 +1,49 @@
 package asu.mc.newnavigate;
 
 import android.Manifest;
-import android.app.Fragment;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.google.android.material.navigation.NavigationView;
-
-import androidx.drawerlayout.widget.DrawerLayout;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
-import android.view.Menu;
-import android.widget.Toast;
-
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import asu.mc.newnavigate.ui.home.HomeFragment;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
@@ -85,6 +79,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 startActivity(intent);
             }
         });
+
+        FloatingActionButton fab_send = findViewById(R.id.fab_send);
+
+        fab_send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String shareBody = "Hi! I am in danger. Please send help to :" + latitude + "," + longitude;
+                Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                sharingIntent.setType("text/plain");
+                sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject Here");
+                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+                startActivity(Intent.createChooser(sharingIntent ,"Share"));
+
+
+            }
+        });
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -98,6 +109,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+        show_Notification();
+
+    }
+
+    public void show_Notification(){
+
+        Intent intent=new Intent(getApplicationContext(),MainActivity.class);
+        String CHANNEL_ID="MYCHANNEL";
+        NotificationChannel notificationChannel=new NotificationChannel(CHANNEL_ID,"name", NotificationManager.IMPORTANCE_LOW);
+        PendingIntent pendingIntent=PendingIntent.getActivity(getApplicationContext(),1,intent,0);
+        Notification notification=new Notification.Builder(getApplicationContext(),CHANNEL_ID)
+                .setContentText("23")
+                .setContentTitle("Crimes near Mill Ave")
+                .setContentIntent(pendingIntent)
+                .addAction(android.R.drawable.sym_action_chat,"Title",pendingIntent)
+                .setChannelId(CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.sym_action_chat)
+                .build();
+
+        NotificationManager notificationManager=(NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.createNotificationChannel(notificationChannel);
+        notificationManager.notify(1,notification);
+
 
     }
 
@@ -120,6 +154,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void reportSuspect(View v){
         Toast.makeText(this, "Reported Suspect", Toast.LENGTH_LONG).show();
+    }
+
+    public void takenScreenShot(View v){
+        Toast.makeText(this, "Saved Offline", Toast.LENGTH_LONG).show();
     }
 
     private boolean CheckGooglePlayServices() {

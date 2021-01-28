@@ -16,7 +16,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * Created by Priyanka on 7/11/17.
+ * Created by Group11 .
  */
 
 public class DownloadUrl {

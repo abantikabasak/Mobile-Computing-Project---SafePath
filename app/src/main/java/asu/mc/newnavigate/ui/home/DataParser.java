@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * @author Priyanka
+ * @author Group11
  */
 
 class DataParser {

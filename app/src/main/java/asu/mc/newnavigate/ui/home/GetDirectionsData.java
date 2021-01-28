@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * @auth Priyanka
+ * @auth Group11
  */
 
 public class GetDirectionsData extends AsyncTask<Object,String,String> {

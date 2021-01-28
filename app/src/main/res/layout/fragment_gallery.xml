@@ -27,5 +27,19 @@
         android:layout_alignParentBottom="true"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:context="asu.mc.newnavigate.MainActivity"
-        tools:layout_editor_absoluteX="-16dp" />
+        tools:layout_editor_absoluteX="-16dp"
+        android:layout_alignParentLeft="true" />
+
+    <Button
+        android:id="@+id/screenshot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save Offline"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+
+
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteX="130dp"
+        tools:layout_editor_absoluteY="16dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

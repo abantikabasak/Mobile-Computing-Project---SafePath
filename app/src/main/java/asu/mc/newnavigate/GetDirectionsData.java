@@ -25,7 +25,7 @@ import java.util.List;
 import asu.mc.newnavigate.ui.home.HomeFragment;
 
 /**
- * @auth Priyanka
+ * @auth Group11
  */
 
 public class GetDirectionsData extends AsyncTask<Object,String,String> {
